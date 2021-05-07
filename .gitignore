@@ -1,0 +1,27 @@
+.DS_Store
+target/
+
+.sbtopts
+
+# vim
+*.sw?
+
+# intellij
+.idea/
+.idea_modules/
+
+# vscode
+.vscode/
+
+# Ignore [ce]tags files
+tags
+
+# Metals
+.metals/
+.bsp/
+.bloop/
+metals.sbt
+
+# mill
+out/
+mill.iml
