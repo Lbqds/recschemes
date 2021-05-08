@@ -81,9 +81,24 @@ object ExprF {
 
   def prettyPrintIgnoreId: Fix[ExprF] => Doc =
     para[ExprF, Doc]((ctx: Fix[ExprF]) => (expr: ExprF[Doc]) => prettyPrintIgnoreId(ctx, expr))
+
+  private def prettyPrintIgnoreId1: RAlgebra1[ExprF, Doc] = {
+    case Call((Fix(Ident("id")), _), args) if args.size == 1 => args.head._2
+    case Call((_, func), args) => func + Doc.char('(') + Doc.fill(Doc.comma, args.map(_._2)) + Doc.char(')')
+    case Index((_, t), (_, i)) => t + Doc.char('[') + i + Doc.char(']')
+    case Unary(op, (_, arg)) => Doc.text(op) + arg 
+    case Binary((_, l), op, (_, r)) => l + Doc.space + Doc.text(op) + Doc.space + r
+    case Paren((_, inner)) => Doc.char('(') + inner + Doc.char(')') 
+    case Literal(v) => Doc.str(v)
+    case Ident(name) => Doc.text(name)
+  }
+
+  def prettyPrintIgnoreIdByPara1: Fix[ExprF] => Doc = 
+    para1[ExprF, Doc](prettyPrintIgnoreId1)
+
 }
 
-object ExprFText extends App {
+object ExprFTest extends App {
   import ExprF._
 
   private val ten: Fix[ExprF] = Fix(Literal(10))
@@ -99,4 +114,5 @@ object ExprFText extends App {
   private val idCall: Fix[ExprF] = Fix(Call(idFunc, List(variable)))
   println(prettyPrint(idCall).render(60))
   println(prettyPrintIgnoreId(idCall).render(60))
+  println(prettyPrintIgnoreIdByPara1(idCall).render(60))
 }

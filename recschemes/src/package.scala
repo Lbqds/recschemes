@@ -5,8 +5,11 @@ package object recschemes {
 
   type Algebra[F[_], A] = F[A] => A
   type Coalgebra[F[_], A] = A => F[A]
-  // current ctx and accumulated value, same as `F[(Fix[F], A)] => A`
+
+  // current ctx and accumulated value
   type RAlgebra[F[_], A] = Fix[F] => F[A] => A
+  type RAlgebra1[F[_], A] = F[(Fix[F], A)] => A
+
   type RCoalgebra[F[_], A] = A => Either[Fix[F], F[A]]
 
   final case class Fix[F[_]](unfix: F[Fix[F]])
@@ -19,6 +22,11 @@ package object recschemes {
 
   def para[F[_]: Functor, A](ralgebra: RAlgebra[F, A])(fix: Fix[F]): A =
     ralgebra(fix)(fix.unfix.map(fa => para(ralgebra)(fa)))
+
+  def para1[F[_]: Functor, A](ralgebra: RAlgebra1[F, A])(fix: Fix[F]): A = {
+    def f(fix: Fix[F]): (Fix[F], A) = (fix, para1(ralgebra)(fix))
+    ralgebra(fix.unfix.map(f))
+  }
 
   def apo[F[_]: Functor, A](rcoalgebra: RCoalgebra[F, A])(a: A): Fix[F] =
     rcoalgebra(a) match {
