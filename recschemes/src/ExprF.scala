@@ -112,7 +112,17 @@ object ExprFTest extends App {
   private val variable: Fix[ExprF] = Fix(Ident("foo"))
   private val idFunc: Fix[ExprF] = Fix(Ident("id"))
   private val idCall: Fix[ExprF] = Fix(Call(idFunc, List(variable)))
-  println(prettyPrint(idCall).render(60))
-  println(prettyPrintIgnoreId(idCall).render(60))
-  println(prettyPrintIgnoreIdByPara1(idCall).render(60))
+  assert(prettyPrintIgnoreId(idCall).render(60) == prettyPrintIgnoreIdByPara1(idCall).render(60))
+
+  def nestedIdCall(level: Int): Fix[ExprF] = {
+    val coalgebra: Coalgebra[ExprF, Int] = {
+      case -1 => Ident[Int]("id")
+      case 0 => Ident[Int]("foo")
+      case n => Call(-1, List(n - 1))
+    }
+    ana(coalgebra)(level)
+  }
+
+  val nestedIdCalls = nestedIdCall(5)
+  assert(prettyPrintIgnoreId(nestedIdCalls).render(60) == prettyPrintIgnoreIdByPara1(nestedIdCalls).render(60))
 }
