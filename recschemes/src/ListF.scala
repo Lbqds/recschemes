@@ -6,6 +6,8 @@ object ListF {
   final case class Nil[E, A]() extends ListF[E, A]
   final case class Cons[E, A](v: E, t: A) extends ListF[E, A]
 
+  def nil[E, A]: ListF[E, A] = Nil[E, A]()
+
   import cats.Functor
   implicit def functor[E]: Functor[ListF[E, *]] = new Functor[ListF[E, *]] {
     override def map[A, B](fa: ListF[E, A])(f: A => B): ListF[E, B] = fa match {
