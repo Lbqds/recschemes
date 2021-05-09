@@ -10,7 +10,7 @@ package object recschemes {
   type RAlgebra[F[_], A] = Fix[F] => F[A] => A
   type RAlgebra1[F[_], A] = F[(Fix[F], A)] => A
 
-  type RCoalgebra[F[_], A] = A => Either[Fix[F], F[A]]
+  type RCoalgebra[F[_], A] = A => F[Either[Fix[F], A]]
 
   final case class Fix[F[_]](unfix: F[Fix[F]])
 
@@ -29,10 +29,10 @@ package object recschemes {
   }
 
   def apo[F[_]: Functor, A](rcoalgebra: RCoalgebra[F, A])(a: A): Fix[F] =
-    rcoalgebra(a) match {
+    Fix(rcoalgebra(a).map {
       case Left(ctx) => ctx
-      case Right(fa) => Fix(fa.map(v => apo(rcoalgebra)(v)))
-    }
+      case Right(v) => apo(rcoalgebra)(v)
+    })
 
   def cataByPara[F[_]: Functor, A](algebra: Algebra[F, A])(fix: Fix[F]): A = {
     val ralgebra: RAlgebra[F, A] = (_: Fix[F]) => (fa: F[A]) => algebra(fa)
@@ -40,7 +40,7 @@ package object recschemes {
   }
 
   def anaByApo[F[_]: Functor, A](coalgebra: Coalgebra[F, A])(a: A): Fix[F] = {
-    val rcoalgebra: RCoalgebra[F, A] = (a: A) => Right(coalgebra(a))
+    val rcoalgebra: RCoalgebra[F, A] = (a: A) => coalgebra(a).map(v => Right(v))
     apo(rcoalgebra)(a)
   }
 }
