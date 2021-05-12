@@ -60,6 +60,7 @@ object ListFTest extends App {
   val list = List(1, 2, 3, 4)
   assert(toList(ListF[Int](list)) == list)
 
+  // ===================== prepro & postpro begin ===================
   import cats.arrow.FunctionK
   def transformer(num: Int, less: Boolean)  = new FunctionK[ListF[Int, *], ListF[Int, *]] {
     override def apply[A](fa: ListF[Int,A]): ListF[Int,A] = fa match {
@@ -81,4 +82,21 @@ object ListFTest extends App {
     case n => Cons(n, n - 1)
   }
   assert(postpro(initCoalgebra, listFAlgebra[Int], transformer(7, false))(10) == List(10, 9, 8))
+
+  // ===================== prepro & postpro end ===================
+
+  // ===================== sliding window by para start ===================
+
+  def slidingWindows[T](lst: List[T], size: Int): List[List[T]] = {
+    // ListF[T, (Fix[ListF[T, *]], List[List[T]])] => List[List[T]]
+    val ralgebra: RAlgebra1[ListF[T, *], List[List[T]]] = {
+      case Nil() => List.empty[List[T]]
+      case Cons(v, (curr, acc)) => (v +: toList(curr).take(size - 1)) +: acc
+    }
+    para1(ralgebra)(ListF(lst))
+  }
+
+  println(slidingWindows(List(1, 2, 3, 4, 5), 3))
+
+  // ===================== sliding window by para end ===================
 }
