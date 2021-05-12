@@ -113,6 +113,30 @@ object holy {
     val func = elgot(algebra)(coalgebra)(exprStr)
     func(Succeed(List.empty[Int]))
   }
+
+  // merge sort by holy
+  import scala.math.Ordering.Implicits._
+  private def mergeLists[T: Ordering](l: List[T], r: List[T]): List[T] = (l, r) match {
+    case (Nil, r) => r
+    case (l, Nil) => l
+    case (lh :: lt, rh :: rt) => if (lh < rh) lh +: mergeLists(lt, r) else rh +: mergeLists(l, rt)
+  }
+
+  import cats.data.NonEmptyList
+  def mergeSort[T: Ordering](lst: NonEmptyList[T]): List[T] = {
+    val coalgebra: Coalgebra[TreeF[T, *], List[T]] = {
+      case Nil => ??? // never happen
+      case v :: Nil => TreeF.Leaf(v)
+      case lst => 
+        val (l, r) = lst.splitAt(lst.size / 2)
+        TreeF.Branch(l, r)
+    }
+    val algebra: Algebra[TreeF[T, *], List[T]] = {
+      case TreeF.Leaf(v) => List(v)
+      case TreeF.Branch(l, r) => mergeLists(l, r)
+    }
+    holy(algebra)(coalgebra)(lst.toList)
+  }
 }
 
 object HolyTest extends App {
@@ -126,4 +150,7 @@ object HolyTest extends App {
   assert(safeRpn("2 3 4 +") == Succeed(List(7, 2)))
   assert(safeRpn("2 +") == NoEnoughOperands(List(2)))
   assert(safeRpn("a 1 3 +").isInstanceOf[ParseError])
+
+  import cats.data.NonEmptyList
+  assert(mergeSort(NonEmptyList.fromListUnsafe(List(12, 5, 7, 89, 23, 0, 34, 9))) == List(0, 5, 7, 9, 12, 23, 34, 89))
 }
