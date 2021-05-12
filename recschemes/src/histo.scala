@@ -1,11 +1,6 @@
 package recschemes
 
 object histo {
-  // current accumulated value and history
-  final case class Attr[F[_], A](acc: A, his: F[Attr[F, A]])
-
-  type CVAlgebra[F[_], A] = F[Attr[F, A]] => A
-
   import cats.Functor
   import cats.implicits._
 
@@ -17,14 +12,6 @@ object histo {
     cvalgebra(fix.unfix.map(recv))
   }
    */
-
-  def dyna[F[_]: Functor, A, C](cvalgebra: CVAlgebra[F, A])(coalgebra: C => F[C])(c: C): A = {
-    def helper: C => Attr[F, A] = (c: C) => {
-      val x = coalgebra(c).map(v => helper(v))
-      Attr(cvalgebra(x), x)
-    }
-    helper(c).acc
-  }
 
   def histo[F[_]: Functor, A](cvalgebra: CVAlgebra[F, A])(fix: Fix[F]): A = {
     def recv(fa: Fix[F]): Attr[F, A] = {

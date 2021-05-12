@@ -27,7 +27,7 @@ object holy {
       ListF.Cons(parseToken(current), remain)
     }
   }
-
+  
   // Algebra[ListF[Token, *], List[Int] => List[Int]]
   // expr = "2 3 +", we get a function:
   // func: List[Int] => List[Int] = (lst: List[Int]) => cont3(2 +: lst) where

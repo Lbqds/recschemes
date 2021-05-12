@@ -15,6 +15,11 @@ package object recschemes {
 
   final case class Fix[F[_]](unfix: F[Fix[F]])
 
+  // current accumulated value and history
+  final case class Attr[F[_], A](acc: A, his: F[Attr[F, A]])
+
+  type CVAlgebra[F[_], A] = F[Attr[F, A]] => A
+
   def cata[F[_]: Functor, A](algebra: Algebra[F, A])(fix: Fix[F]): A =
     algebra(fix.unfix.map(fa => cata(algebra)(fa)))
 
