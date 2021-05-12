@@ -8,7 +8,8 @@ object recschemes extends ScalaModule {
   def ivyDeps = Agg(
     ivy"org.typelevel::paiges-core:0.3.0",
     ivy"org.typelevel::paiges-cats:0.3.0",
-    ivy"org.typelevel::cats-core:2.3.0"
+    ivy"org.typelevel::cats-core:2.3.0",
+    ivy"io.higherkindness::droste-core:0.8.0"
   )
 
   def scalacPluginIvyDeps = Agg(

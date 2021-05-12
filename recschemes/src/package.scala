@@ -1,5 +1,6 @@
 import cats.Functor
 import cats.implicits._
+import cats.arrow.FunctionK
 
 package object recschemes {
 
@@ -43,4 +44,16 @@ package object recschemes {
     val rcoalgebra: RCoalgebra[F, A] = (a: A) => coalgebra(a).map(v => Right(v))
     apo(rcoalgebra)(a)
   }
+
+  def prepro[F[_]: Functor, A, R](
+    algebra: Algebra[F, A], 
+    coalgebra: Coalgebra[F, R],
+    f: FunctionK[F, F])(r: R): A = 
+      algebra(f[R](coalgebra(r)).map(v => prepro(algebra, coalgebra, f)(v)))
+
+  def postpro[F[_]: Functor, A, R](
+    coalgebra: Coalgebra[F, A], 
+    algebra: Algebra[F, R],
+    f: FunctionK[F, F])(a: A): R = 
+      algebra(f[A](coalgebra(a)).map(v => postpro(coalgebra, algebra, f)(v)))
 }
