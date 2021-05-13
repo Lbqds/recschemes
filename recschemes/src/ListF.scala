@@ -85,7 +85,7 @@ object ListFTest extends App {
 
   // ===================== prepro & postpro end ===================
 
-  // ===================== sliding window by para start ===================
+  // ===================== sliding window by para begin ===================
 
   def slidingWindows[T](lst: List[T], size: Int): List[List[T]] = {
     // ListF[T, (Fix[ListF[T, *]], List[List[T]])] => List[List[T]]
@@ -96,7 +96,28 @@ object ListFTest extends App {
     para1(ralgebra)(ListF(lst))
   }
 
-  println(slidingWindows(List(1, 2, 3, 4, 5), 3))
+  assert(slidingWindows(List(1, 2, 3, 4, 5), 3) == List(List(1, 2, 3), List(2, 3, 4), List(3, 4, 5), List(4, 5), List(5)))
 
   // ===================== sliding window by para end ===================
+
+  // ===================== insert sort by cata and apo begin ===================
+
+  import scala.math.Ordering.Implicits._
+  def insertElement[T: Ordering]: Algebra[ListF[T, *], List[T]] = {
+    // ListF[T, List[T]] => ListF[T, Either[Fix[ListF[T, *]], ListF[T, List[T]]]]
+    val rcoalgebra: RCoalgebra[ListF[T, *], ListF[T, List[T]]] = {
+      case Nil() => Nil()
+      case Cons(v, t) if t.isEmpty => Cons(v, Right(Nil()))
+      case Cons(v, l @ (h :: t)) if v <= h => Cons(v, Left(ListF[T](l)))
+      case Cons(v, l @ (h :: t)) if v > h => Cons(h, Right(Cons(v, t)))
+      case _ => ??? // never happen
+    }
+    (lst: ListF[T, List[T]]) => toList(apo(rcoalgebra)(lst))
+  }
+
+  def insertSort[T: Ordering](lst: List[T]): List[T] = cata(insertElement[T])(ListF[T](lst))
+
+  assert(insertSort(List(12, 5, 7, 89, 23, 0, 34, 9)) == List(0, 5, 7, 9, 12, 23, 34, 89))
+
+  // ===================== insert sort by cata and apo begin ===================
 }
