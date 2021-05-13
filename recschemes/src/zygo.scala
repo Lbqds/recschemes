@@ -12,6 +12,11 @@ object zygo {
     cata[F, (B, A)](f)(fix)._2
   }
 
+  def para1ByZygo[F[_]: Functor, A](ralgebra: RAlgebra1[F, A])(fix: Fix[F]): A = {
+    val fixAlgebra: Algebra[F, Fix[F]] = Fix(_)
+    zygo(fixAlgebra)(ralgebra)(fix)
+  }
+
   type ZygoImpl[F[_], A, B] = Algebra[F, B] => (F[(B, A)] => A) => Fix[F] => A
 
   // foo [a, b, c, d, e] = a - b + c - d + e
