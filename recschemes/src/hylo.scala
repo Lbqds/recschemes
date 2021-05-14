@@ -24,7 +24,7 @@ object hylo {
     if (str.isEmpty) ListF.nil[Token, String] else {
       val concrete = str.dropWhile(_.isWhitespace)
       val (current, remain) = concrete.span(c => !c.isWhitespace)
-      ListF.Cons(parseToken(current), remain)
+      ListF.ConsF(parseToken(current), remain)
     }
   }
   
@@ -40,9 +40,9 @@ object hylo {
   //
   // then we apply `func` with empty list `func(List.empty[Int])` and get the result: [5]
   def evaluate(expr: ListF[Token, List[Int] => List[Int]]): List[Int] => List[Int] = expr match {
-    case ListF.Nil() => (lst: List[Int]) => lst
-    case ListF.Cons(Lit(value), cont) => (lst: List[Int]) => cont(value +: lst)
-    case ListF.Cons(Op(func), cont) => (lst: List[Int]) => cont(lst match {
+    case ListF.NilF => (lst: List[Int]) => lst
+    case ListF.ConsF(Lit(value), cont) => (lst: List[Int]) => cont(value +: lst)
+    case ListF.ConsF(Op(func), cont) => (lst: List[Int]) => cont(lst match {
       case (a :: b :: tail) => func(b, a) +: tail
       case _ => throw new RuntimeException(s"no enough operands, stack: $lst")
     })
@@ -94,13 +94,13 @@ object hylo {
     if (str.isEmpty) Right(ListF.nil[Token, String]) else {
       val concrete = str.dropWhile(_.isWhitespace)
       val (current, remain) = concrete.span(c => !c.isWhitespace)
-      safeParseToken(current).map(token => ListF.Cons(token, remain))
+      safeParseToken(current).map(token => ListF.ConsF(token, remain))
     }
   }
 
   def safeEvaluate: ListF[Token, Cont] => Cont = (expr: ListF[Token, Cont]) => (res: Result) => (expr, res) match {
-    case (ListF.Cons(Lit(value), cont), Succeed(lst)) => cont(Succeed(value +: lst))
-    case (ListF.Cons(Op(func), cont), Succeed(lst)) => cont(lst match {
+    case (ListF.ConsF(Lit(value), cont), Succeed(lst)) => cont(Succeed(value +: lst))
+    case (ListF.ConsF(Op(func), cont), Succeed(lst)) => cont(lst match {
       case (a :: b :: tail) => Succeed(func(b, a) +: tail)
       case _ => NoEnoughOperands(lst)
     })

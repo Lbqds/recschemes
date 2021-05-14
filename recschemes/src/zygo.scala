@@ -22,12 +22,12 @@ object zygo {
   // foo [a, b, c, d, e] = a - b + c - d + e
   private def foo(lst: Fix[ListF[Int, *]])(zygoImpl: ZygoImpl[ListF[Int, *], Int, Boolean]): Int = {
     val algebra: ListF[Int, Boolean] => Boolean = {
-      case ListF.Nil() => false
-      case ListF.Cons(_, b) => !b
+      case ListF.NilF => false
+      case ListF.ConsF(_, b) => !b
     }
     val func: ListF[Int, (Boolean, Int)] => Int = {
-      case ListF.Nil() => 0
-      case ListF.Cons(curr, (b, acc)) => if (b) acc + curr else acc - curr
+      case ListF.NilF => 0
+      case ListF.ConsF(curr, (b, acc)) => if (b) acc + curr else acc - curr
     }
     zygo[ListF[Int, *], Int, Boolean](algebra)(func)(lst)
   }

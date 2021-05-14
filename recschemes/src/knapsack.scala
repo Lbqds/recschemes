@@ -46,12 +46,12 @@ object Knapsack {
     val cvalgebra: CVAlgebra[Nat, Double] = {
       case Zero => 0.0
       case nat @ Next(attr) =>
-      val current = toInt(nat)
-      val results = items.filter(_.weight <= current).map { item =>
-        val remain = current - item.weight
-        lookup(attr, current - 1 - remain) + item.value
-      }
-      if (results.isEmpty) 0.0 else results.max
+        val current = toInt(nat)
+        val results = items.filter(_.weight <= current).map { item =>
+          val remain = current - item.weight
+          lookup(attr, current - 1 - remain) + item.value
+        }
+        if (results.isEmpty) 0.0 else results.max
     }
     histo(cvalgebra)(fromIntByAna(capacity))
   }
