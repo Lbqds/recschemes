@@ -4,8 +4,8 @@ import scala.util.control.NonFatal
 import cats.Functor
 import cats.implicits._
 
-object holy {
-  def holy[F[_]: Functor, A, B](algebra: Algebra[F, B])(coalgebra: Coalgebra[F, A])(a: A): B =
+object hylo {
+  def hylo[F[_]: Functor, A, B](algebra: Algebra[F, B])(coalgebra: Coalgebra[F, A])(a: A): B =
     cata(algebra)(ana(coalgebra)(a))
 
   sealed trait Token
@@ -51,7 +51,7 @@ object holy {
   def rpn(exprStr: String): List[Int] = {
     val algebra: Algebra[ListF[Token, *], List[Int] => List[Int]] = evaluate(_)
     val coalgebra: Coalgebra[ListF[Token, *], String] = parse(_)
-    val func = holy(algebra)(coalgebra)(exprStr)
+    val func = hylo(algebra)(coalgebra)(exprStr)
     func(List.empty[Int])
   }
 
@@ -114,7 +114,7 @@ object holy {
     func(Succeed(List.empty[Int]))
   }
 
-  // merge sort by holy
+  // merge sort by hylo
   import scala.math.Ordering.Implicits._
   private def mergeLists[T: Ordering](l: List[T], r: List[T]): List[T] = (l, r) match {
     case (Nil, r) => r
@@ -135,12 +135,12 @@ object holy {
       case TreeF.Leaf(v) => List(v)
       case TreeF.Branch(l, r) => mergeLists(l, r)
     }
-    holy(algebra)(coalgebra)(lst.toList)
+    hylo(algebra)(coalgebra)(lst.toList)
   }
 }
 
-object HolyTest extends App {
-  import holy._
+object HyloTest extends App {
+  import hylo._
 
   assert(rpn("2 3 +") == List(5))
   assert(rpn("15 7 1 1 + - / 3 * 2 1 1 + + -") == List(5))
