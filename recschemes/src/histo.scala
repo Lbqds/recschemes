@@ -22,6 +22,11 @@ object histo {
     recv(fix).acc
   }
 
+  def histoByCata[F[_]: Functor, A](cvalgebra: CVAlgebra[F, A])(fix: Fix[F]): A = {
+    val algebra: Algebra[F, Attr[F, A]] = (fattr: F[Attr[F, A]]) => Attr(cvalgebra(fattr), fattr)
+    cata(algebra)(fix).acc
+  }
+
   def cataByHisto[F[_]: Functor, A](algebra: Algebra[F, A])(fix: Fix[F]): A = {
     val cvalgebra: CVAlgebra[F, A] = fattr => algebra(fattr.map(_.acc))
     histo(cvalgebra)(fix)
