@@ -91,12 +91,16 @@ object ListFTest extends App {
     // ListF[T, (Fix[ListF[T, *]], List[List[T]])] => List[List[T]]
     val ralgebra: RAlgebra1[ListF[T, *], List[List[T]]] = {
       case NilF => List.empty[List[T]]
-      case ConsF(v, (curr, acc)) => (v +: toList(curr).take(size - 1)) +: acc
+      case ConsF(v, (curr, acc)) => 
+        val lst = toList(curr)
+        if (lst.size < size - 1) acc
+        else (v +: lst.take(size - 1)) +: acc
     }
     para1(ralgebra)(ListF(lst))
   }
 
-  assert(slidingWindows(List(1, 2, 3, 4, 5), 3) == List(List(1, 2, 3), List(2, 3, 4), List(3, 4, 5), List(4, 5), List(5)))
+  assert(slidingWindows(List(1, 2, 3, 4, 5), 3) == List(List(1, 2, 3), List(2, 3, 4), List(3, 4, 5)))
+  assert(slidingWindows(List(1, 2, 3, 4, 5), 6) == List.empty[List[Int]])
 
   // ===================== sliding window by para end ===================
 
