@@ -8,6 +8,10 @@ object hylo {
   def hylo[F[_]: Functor, A, B](algebra: Algebra[F, B])(coalgebra: Coalgebra[F, A])(a: A): B =
     cata(algebra)(ana(coalgebra)(a))
 
+  // more efficiency, no intermediate recursive data structure
+  def hylo1[F[_]: Functor, A, B](algebra: Algebra[F, B])(coalgebra: Coalgebra[F, A])(a: A): B = 
+    algebra(coalgebra(a).map(v => hylo1(algebra)(coalgebra)(v)))
+
   sealed trait Token
   final case class Lit(value: Int) extends Token
   final case class Op(func: (Int, Int) => Int) extends Token
